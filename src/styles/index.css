@@ -144,13 +144,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .lightbox button { display: grid; width: 39px; height: 39px; place-items: center; padding: 0; color: inherit; background: rgb(255 205 186 / 8%); border: 1px solid rgb(255 205 186 / 16%); border-radius: 50%; transition: background 180ms ease, transform 180ms ease; }
 .lightbox button:disabled { cursor: default; opacity: .45; }
 .lightbox button:hover { background: rgb(255 205 186 / 18%); transform: scale(1.06); }
-.lightbox__stage { position: relative; z-index: 1; min-height: 0; padding: clamp(10px, 2vw, 28px) clamp(150px, 16vw, 250px) clamp(10px, 2vw, 28px) clamp(12px, 2vw, 32px); overflow: hidden; touch-action: none; cursor: zoom-in; }
+.lightbox__stage { position: relative; z-index: 1; min-height: 0; padding: clamp(10px, 2vw, 28px) clamp(66px, 7vw, 108px); overflow: hidden; touch-action: none; cursor: zoom-in; }
 .lightbox__stage::after { position: absolute; z-index: 0; inset: 12%; content: ''; border-radius: 50%; background: radial-gradient(circle, rgb(255 197 168 / 20%), transparent 66%); opacity: 0; pointer-events: none; }
 .lightbox__stage--forward::after, .lightbox__stage--backward::after { animation: stage-glow 620ms ease-out both; }
 .lightbox__stage--zoomed { cursor: grab; }
 .lightbox__stage:active { cursor: grabbing; }
 .lightbox__canvas { position: relative; width: 100%; height: 100%; overflow: hidden; }
-.lightbox__photo-enter, .lightbox__photo-leave { position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-start; min-width: 0; min-height: 0; overflow: hidden; isolation: isolate; }
+.lightbox__photo-enter, .lightbox__photo-leave { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; overflow: hidden; isolation: isolate; }
 .lightbox__photo-enter { z-index: 2; }
 .lightbox__photo-leave { z-index: 1; }
 .lightbox__photo-enter--initial { animation: photo-arrive 420ms cubic-bezier(.2,.7,.2,1) both; }
