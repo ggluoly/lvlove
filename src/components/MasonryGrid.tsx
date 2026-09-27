@@ -9,7 +9,7 @@ interface MasonryGridProps {
 export function MasonryGrid({ photos, onOpen }: MasonryGridProps) {
   return (
     <div className="masonry-grid">
-      {photos.map((photo, index) => <PhotoCard key={photo.id} photo={photo} priority={index < 4} onOpen={onOpen} />)}
+      {photos.map((photo, index) => <PhotoCard key={photo.id} photo={photo} position={index} priority={index < 4} onOpen={onOpen} />)}
     </div>
   )
 }

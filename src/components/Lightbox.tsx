@@ -131,11 +131,13 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
   return (
     <div className="lightbox" ref={dialog} role="dialog" aria-modal="true" aria-label={`查看照片 ${selected.title}`}>
       <div className="lightbox__toolbar">
-        <span>{String(currentIndex + 1).padStart(2, '0')} / {String(photos.length).padStart(2, '0')}</span>
+        <span>{String(currentIndex + 1).padStart(2, '0')} / {String(photos.length).padStart(2, '0')} <i>·</i> {Math.round(zoom * 100)}%</span>
         <button ref={closeButton} type="button" aria-label="关闭查看器" onClick={onClose}><X aria-hidden="true" /></button>
       </div>
-      <div className="lightbox__stage" ref={stage} onClick={onStageClick} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerEnd} onPointerCancel={onPointerEnd}>
+      <div className={`lightbox__stage ${zoom > 1 ? 'lightbox__stage--zoomed' : ''}`} ref={stage} onClick={onStageClick} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerEnd} onPointerCancel={onPointerEnd}>
         <img
+          key={selected.id}
+          className="lightbox__photo"
           src={assetUrl(selected.source)}
           alt={selected.title}
           draggable={false}
@@ -148,7 +150,7 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
         <button className="lightbox__nav lightbox__nav--next" type="button" aria-label="下一张照片" onClick={() => selectOffset(1)}><ChevronRight aria-hidden="true" /></button>
       </>}
       <div className="lightbox__details">
-        <div><p>{selected.album.toUpperCase()}</p><h2>{selected.title}</h2><span>{fullDateFormatter.format(new Date(`${selected.date}T00:00:00`))}{selected.location ? ` · ${selected.location}` : ''}</span></div>
+        <div><p>{selected.album.toUpperCase()}</p><h2>{selected.title}</h2><span>{fullDateFormatter.format(new Date(`${selected.date}T00:00:00`))}{selected.location ? ` · ${selected.location}` : ''}</span><small>滚动鼠标滚轮缩放 · 双击切换倍率</small></div>
         <button type="button" aria-label={zoom > 1 ? '还原图片大小' : '放大图片'} onClick={toggleZoom}>{zoom > 1 ? <Minimize2 aria-hidden="true" /> : <Maximize2 aria-hidden="true" />}</button>
       </div>
     </div>

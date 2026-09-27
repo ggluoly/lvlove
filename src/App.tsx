@@ -58,8 +58,8 @@ function HomePage({ photos }: { photos: Photo[] }) {
     <Hero photos={photos} />
     <main className="container home-content">
       <Reveal className="section-intro">
-        <div><p className="eyebrow">RECENT OBSERVATIONS</p><h2>最近收录</h2></div>
-        <Link className="text-link" to="/gallery">全部影像 <ArrowRight size={16} aria-hidden="true" /></Link>
+        <div><p className="eyebrow">THE DAYS WE KEPT</p><h2>靠近的片段</h2></div>
+        <Link className="text-link" to="/gallery">全部照片 <ArrowRight size={16} aria-hidden="true" /></Link>
       </Reveal>
       {featured.length ? <MasonryGrid photos={featured} onOpen={setSelected} /> : <EmptyState />}
     </main>
@@ -89,9 +89,9 @@ function ArchivePage({ photos, mode }: { photos: Photo[]; mode: 'gallery' | 'tim
 
   return <main className="archive-page container">
     <Reveal className="archive-header">
-      <p className="eyebrow">{mode === 'gallery' ? 'THE COMPLETE COLLECTION' : 'CHRONOLOGICAL RECORD'}</p>
-      <h1>{mode === 'gallery' ? '全部影像' : '时间坐标'}</h1>
-      <p>{mode === 'gallery' ? '每一次停留，都是一个可被重新抵达的瞬间。' : '顺着时间往回走，所有画面都在这里留下坐标。'}</p>
+      <p className="eyebrow">{mode === 'gallery' ? 'THE DAYS WE KEPT' : 'A WALK THROUGH TIME'}</p>
+      <h1>{mode === 'gallery' ? '日常的片段' : '沿途的光'}</h1>
+      <p>{mode === 'gallery' ? '那些不必解释的瞬间，都被好好留在这里。' : '顺着走过的日子，把每一次回头都变成坐标。'}</p>
       <div className="archive-header__stat"><strong>{filtered.length}</strong> FRAMES <span /> <strong>{groupCount}</strong> YEARS</div>
     </Reveal>
     <Reveal delay={80}><ArchiveControls years={years} months={months} albums={albums} year={year} month={month} album={album} query={query} sortOrder={sortOrder} onYearChange={setYear} onMonthChange={setMonth} onAlbumChange={setAlbum} onQueryChange={setQuery} onSortOrderChange={setSortOrder} /></Reveal>
@@ -115,12 +115,12 @@ function GallerySections({ photos, onOpen }: { photos: Photo[]; onOpen: (photo: 
 function AboutPage() {
   return <main className="about-page container">
     <p className="eyebrow">ABOUT THE ARCHIVE</p>
-    <h1>不是照片的堆叠，<br />是时间的显影。</h1>
+    <h1>不是照片的堆叠，<br />是日子慢慢发亮。</h1>
     <div className="about-page__grid">
-      <p>这是一个持续生长的个人影像档案。它不试图解释每一个瞬间，只为画面留出足够安静的空间。</p>
-      <p>每张照片按拍摄日期整理，在静态网页中保存。没有后端、没有数据库，只有被认真保留的光线与记忆。</p>
+      <p>这里收着一些无需解释的瞬间。它不急着讲述，只让画面留出足够安静的空间。</p>
+      <p>有些日子不必反复回望，也会在某个安静的时刻重新发亮。愿路过的风、落下的晚霞和说过的话，都替我们好好记得。</p>
     </div>
-    <Link className="round-link" to="/gallery">进入档案 <MoveRight aria-hidden="true" /></Link>
+    <Link className="round-link" to="/gallery">翻看片段 <MoveRight aria-hidden="true" /></Link>
   </main>
 }
 

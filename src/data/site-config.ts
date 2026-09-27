@@ -1,7 +1,7 @@
 export const siteConfig = {
   title: 'lvlin',
-  eyebrow: 'PERSONAL VISUAL ARCHIVE',
-  statement: '收集日常的微光，把每一次回望留在时间里。',
-  description: '一个按时间保存的个人影像档案。',
-  footer: 'All moments, carefully kept.',
+  eyebrow: 'SMALL MOMENTS, KEPT CLOSE',
+  statement: '把走过的日子，慢慢收进光里。',
+  description: '收藏日常片段与温柔光线的照片空间。',
+  footer: 'For the little moments we keep.',
 }

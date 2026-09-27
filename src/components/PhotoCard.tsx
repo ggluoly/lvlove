@@ -1,6 +1,6 @@
 import { Expand } from 'lucide-react'
 import { useState } from 'react'
-import type { PointerEvent } from 'react'
+import type { CSSProperties, PointerEvent } from 'react'
 import { useInView } from '../hooks/useInView'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import type { Photo } from '../types/photo'
@@ -11,9 +11,10 @@ interface PhotoCardProps {
   photo: Photo
   onOpen: (photo: Photo) => void
   priority?: boolean
+  position?: number
 }
 
-export function PhotoCard({ photo, onOpen, priority = false }: PhotoCardProps) {
+export function PhotoCard({ photo, onOpen, priority = false, position = 0 }: PhotoCardProps) {
   const { ref, isVisible } = useInView<HTMLButtonElement>()
   const [loaded, setLoaded] = useState(false)
   const reducedMotion = useReducedMotion()
@@ -48,7 +49,7 @@ export function PhotoCard({ photo, onOpen, priority = false }: PhotoCardProps) {
       onPointerMove={updateTilt}
       onPointerLeave={resetTilt}
       aria-label={`查看照片：${photo.title}`}
-      style={{ backgroundImage: `url(${preview})` }}
+      style={{ backgroundImage: `url(${preview})`, '--card-delay': `${Math.min(position, 9) * 45}ms` } as CSSProperties}
     >
       {shouldLoad && (
         <picture>

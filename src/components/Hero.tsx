@@ -33,9 +33,15 @@ export function Hero({ photos }: HeroProps) {
   }
 
   return (
-    <section className="hero" ref={sectionRef} onPointerMove={updateParallax} onPointerLeave={resetParallax}>
+    <section className={`hero ${latest ? 'hero--has-photo' : ''}`} ref={sectionRef} onPointerMove={updateParallax} onPointerLeave={resetParallax}>
       <div className="hero__image" style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined} />
+      <div className="hero__glow hero__glow--one" aria-hidden="true" />
+      <div className="hero__glow hero__glow--two" aria-hidden="true" />
       <div className="hero__grain" />
+      {latest && <aside className="hero__memory-card" aria-hidden="true">
+        <div className="hero__memory-image" style={{ backgroundImage: `url(${backgroundImage})` }} />
+        <span>A SMALL DAY / {latest.date}</span>
+      </aside>}
       <div className="hero__content container">
         <p className="eyebrow hero__eyebrow">{siteConfig.eyebrow}</p>
         <h1>{siteConfig.title}</h1>
@@ -43,13 +49,13 @@ export function Hero({ photos }: HeroProps) {
         <div className="hero__footer">
           <div className="hero__metrics">
             <span>{yearRange}</span>
-            <span><strong>{photos.length}</strong> 张影像</span>
+            <span><strong>{photos.length}</strong> 张照片</span>
             <span><strong>{albums.size}</strong> 个分类</span>
           </div>
-          <Link className="round-link" to="/gallery">浏览影像 <ArrowDownRight aria-hidden="true" /></Link>
+          <Link className="round-link" to="/gallery">浏览照片 <ArrowDownRight aria-hidden="true" /></Link>
         </div>
       </div>
-      {latest && <p className="hero__caption">LATEST FRAME / {latest.date}</p>}
+      {latest && <p className="hero__caption">A LITTLE MOMENT / {latest.date}</p>}
     </section>
   )
 }
