@@ -313,7 +313,7 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
   }
 
   const onStageClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget && zoom === 1) actions.current.onClose()
+    if ((event.target === event.currentTarget || (event.target as HTMLElement).classList.contains('lightbox__canvas')) && zoom === 1) actions.current.onClose()
   }
 
   const toggleZoom = () => setZoom((value) => value > 1 ? 1 : 2)
@@ -326,18 +326,20 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
         <button ref={closeButton} type="button" aria-label="关闭查看器" onClick={onClose}><X aria-hidden="true" /></button>
       </div>
       <div className={`lightbox__stage ${zoom > 1 ? 'lightbox__stage--zoomed' : ''} lightbox__stage--${transitionDirection}`} ref={stage} onClick={onStageClick} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerEnd} onPointerCancel={(event) => onPointerEnd(event, true)}>
-        {outgoingPhoto && <div className={`lightbox__photo-leave lightbox__photo-leave--${transitionDirection}`} aria-hidden="true">
-          <img src={assetUrl(outgoingPhoto.source)} alt="" draggable={false} />
-        </div>}
-        <div className={`lightbox__photo-enter lightbox__photo-enter--${transitionDirection}`} key={displayedPhoto.id}>
-          <img
-            className="lightbox__photo"
-            src={assetUrl(displayedPhoto.source)}
-            alt=""
-            draggable={false}
-            onDoubleClick={toggleZoom}
-            style={{ transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})` }}
-          />
+        <div className="lightbox__canvas">
+          {outgoingPhoto && <div className={`lightbox__photo-leave lightbox__photo-leave--${transitionDirection}`} aria-hidden="true">
+            <img src={assetUrl(outgoingPhoto.source)} alt="" draggable={false} />
+          </div>}
+          <div className={`lightbox__photo-enter lightbox__photo-enter--${transitionDirection}`} key={displayedPhoto.id}>
+            <img
+              className="lightbox__photo"
+              src={assetUrl(displayedPhoto.source)}
+              alt=""
+              draggable={false}
+              onDoubleClick={toggleZoom}
+              style={{ transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})` }}
+            />
+          </div>
         </div>
       </div>
       {canNavigate && <>

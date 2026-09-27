@@ -144,20 +144,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .lightbox button { display: grid; width: 39px; height: 39px; place-items: center; padding: 0; color: inherit; background: rgb(255 205 186 / 8%); border: 1px solid rgb(255 205 186 / 16%); border-radius: 50%; transition: background 180ms ease, transform 180ms ease; }
 .lightbox button:disabled { cursor: default; opacity: .45; }
 .lightbox button:hover { background: rgb(255 205 186 / 18%); transform: scale(1.06); }
-.lightbox__stage { position: relative; z-index: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; touch-action: none; cursor: zoom-in; }
+.lightbox__stage { position: relative; z-index: 1; min-height: 0; padding: clamp(10px, 2vw, 28px) clamp(150px, 16vw, 250px) clamp(10px, 2vw, 28px) clamp(12px, 2vw, 32px); overflow: hidden; touch-action: none; cursor: zoom-in; }
 .lightbox__stage::after { position: absolute; z-index: 0; inset: 12%; content: ''; border-radius: 50%; background: radial-gradient(circle, rgb(255 197 168 / 20%), transparent 66%); opacity: 0; pointer-events: none; }
 .lightbox__stage--forward::after, .lightbox__stage--backward::after { animation: stage-glow 620ms ease-out both; }
 .lightbox__stage--zoomed { cursor: grab; }
 .lightbox__stage:active { cursor: grabbing; }
-.lightbox__photo-enter, .lightbox__photo-leave { display: grid; max-width: min(92vw, 1500px); max-height: calc(100svh - 190px); }
-.lightbox__photo-enter { position: relative; z-index: 2; }
-.lightbox__photo-leave { position: absolute; z-index: 1; }
+.lightbox__canvas { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.lightbox__photo-enter, .lightbox__photo-leave { position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-start; min-width: 0; min-height: 0; overflow: hidden; isolation: isolate; }
+.lightbox__photo-enter { z-index: 2; }
+.lightbox__photo-leave { z-index: 1; }
 .lightbox__photo-enter--initial { animation: photo-arrive 420ms cubic-bezier(.2,.7,.2,1) both; }
 .lightbox__photo-enter--forward { animation: photo-enter-forward 520ms cubic-bezier(.16,.84,.25,1) both; }
 .lightbox__photo-enter--backward { animation: photo-enter-backward 520ms cubic-bezier(.16,.84,.25,1) both; }
 .lightbox__photo-leave--forward { animation: photo-leave-forward 520ms cubic-bezier(.16,.84,.25,1) both; }
 .lightbox__photo-leave--backward { animation: photo-leave-backward 520ms cubic-bezier(.16,.84,.25,1) both; }
-.lightbox__stage img { display: block; max-width: min(92vw, 1500px); max-height: calc(100svh - 190px); object-fit: contain; user-select: none; will-change: transform; transition: transform 150ms ease; }
+.lightbox__stage img { position: relative; z-index: 1; display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; will-change: transform; transition: transform 150ms ease; }
 .lightbox__nav { position: absolute; z-index: 7; top: 50%; transform: translateY(-50%); }
 .lightbox__nav--previous { left: clamp(10px, 2vw, 32px); }
 .lightbox__nav--next { right: clamp(10px, 2vw, 32px); }
@@ -233,7 +234,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .control-row select { justify-self: start; }
   .timeline { gap: 64px; }
   .lightbox__nav { display: none; }
-  .lightbox__stage img { max-width: 100vw; max-height: calc(100svh - 180px); }
+  .lightbox__stage { display: flex; align-items: center; padding: 12px 16px; }
+  .lightbox__canvas, .lightbox__canvas--portrait { width: 100%; height: 100%; aspect-ratio: auto; }
+  .lightbox__stage img { max-width: 100%; max-height: 100%; }
   .lightbox__confession { top: auto; right: 24px; bottom: 95px; max-height: 40vh; font-size: .88rem; line-height: 1.85; transform: none; }
   .about-page__grid { grid-template-columns: 1fr; gap: 18px; margin: 42px 0; }
 }
