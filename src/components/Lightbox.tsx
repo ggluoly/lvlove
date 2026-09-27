@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { MouseEvent, PointerEvent } from 'react'
 import type { Photo } from '../types/photo'
 import { fullDateFormatter } from '../utils/photos'
@@ -11,6 +11,8 @@ interface LightboxProps {
   onClose: () => void
   onSelect: (photo: Photo) => void
 }
+
+type TransitionDirection = 'initial' | 'forward' | 'backward'
 
 const confessions = [
   '你在身边的时候，连平常的日子都有了光。',
@@ -146,8 +148,12 @@ function takeNextConfession() {
 }
 
 export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps) {
-  const currentIndex = photos.findIndex((photo) => photo.id === selected.id)
-  const selectedDate = fullDateFormatter.format(new Date(`${selected.date}T00:00:00`))
+  const [displayedPhoto, setDisplayedPhoto] = useState(selected)
+  const [outgoingPhoto, setOutgoingPhoto] = useState<Photo | null>(null)
+  const [transitionDirection, setTransitionDirection] = useState<TransitionDirection>('initial')
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const currentIndex = photos.findIndex((photo) => photo.id === displayedPhoto.id)
+  const selectedDate = fullDateFormatter.format(new Date(`${displayedPhoto.date}T00:00:00`))
   const [zoom, setZoom] = useState(1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [confession, setConfession] = useState(takeNextConfession)
@@ -155,36 +161,61 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
   const dialog = useRef<HTMLDivElement>(null)
   const stage = useRef<HTMLDivElement>(null)
   const returnFocus = useRef<HTMLElement | null>(null)
-  const displayedPhotoId = useRef(selected.id)
+  const transitionDirectionRef = useRef<TransitionDirection>('initial')
+  const outgoingTimer = useRef<number | null>(null)
+  const isTransitioningRef = useRef(false)
   const actions = useRef({ onClose, onSelect, photos, currentIndex })
   const pointers = useRef(new Map<number, { x: number, y: number }>())
-  const gesture = useRef<{ x: number; y: number; scale: number; distance: number | null } | null>(null)
+  const gesture = useRef<{ startX: number; startY: number; x: number; y: number; scale: number; distance: number | null; pinching: boolean } | null>(null)
 
   actions.current = { onClose, onSelect, photos, currentIndex }
 
   const selectOffset = (offset: number) => {
     const { currentIndex: index, onSelect: select, photos: collection } = actions.current
+    if (isTransitioningRef.current || collection.length < 2) return
     const next = collection[(index + offset + collection.length) % collection.length]
+    isTransitioningRef.current = true
+    setIsTransitioning(true)
+    transitionDirectionRef.current = offset > 0 ? 'forward' : 'backward'
     select(next)
   }
+
+  useLayoutEffect(() => {
+    if (displayedPhoto.id === selected.id) return
+    if (outgoingTimer.current) window.clearTimeout(outgoingTimer.current)
+    const direction = transitionDirectionRef.current
+    isTransitioningRef.current = true
+    setIsTransitioning(true)
+    setTransitionDirection(direction)
+    setOutgoingPhoto(displayedPhoto)
+    setDisplayedPhoto(selected)
+    setZoom(1)
+    setPosition({ x: 0, y: 0 })
+    setConfession(takeNextConfession())
+    outgoingTimer.current = window.setTimeout(() => {
+      setOutgoingPhoto(null)
+      isTransitioningRef.current = false
+      setIsTransitioning(false)
+    }, 560)
+  }, [displayedPhoto, selected])
+
+  useEffect(() => {
+    return () => {
+      if (outgoingTimer.current) window.clearTimeout(outgoingTimer.current)
+    }
+  }, [])
 
   useEffect(() => {
     setZoom(1)
     setPosition({ x: 0, y: 0 })
-  }, [selected.id])
-
-  useEffect(() => {
-    if (displayedPhotoId.current === selected.id) return
-    displayedPhotoId.current = selected.id
-    setConfession(takeNextConfession())
-  }, [selected.id])
+  }, [displayedPhoto.id])
 
   useEffect(() => {
     const next = photos[(currentIndex + 1) % photos.length]
-    if (!next || next.id === selected.id) return
+    if (!next || next.id === displayedPhoto.id) return
     const preload = new Image()
     preload.src = assetUrl(next.sources.webp[1] ?? next.sources.webp[0] ?? next.source)
-  }, [currentIndex, photos, selected.id])
+  }, [currentIndex, photos, displayedPhoto.id])
 
   useEffect(() => {
     if (!returnFocus.current && document.activeElement instanceof HTMLElement) returnFocus.current = document.activeElement
@@ -235,17 +266,23 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
   }
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (isTransitioningRef.current) return
     event.currentTarget.setPointerCapture(event.pointerId)
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
-    gesture.current = { x: event.clientX, y: event.clientY, scale: zoom, distance: distance() }
+    if (pointers.current.size === 1) {
+      gesture.current = { startX: event.clientX, startY: event.clientY, x: event.clientX, y: event.clientY, scale: zoom, distance: null, pinching: false }
+      return
+    }
+    gesture.current = { startX: event.clientX, startY: event.clientY, x: event.clientX, y: event.clientY, scale: zoom, distance: distance(), pinching: true }
   }
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!pointers.current.has(event.pointerId) || !gesture.current) return
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
     const pinchDistance = distance()
-    if (pinchDistance && gesture.current.distance) {
-      setZoom(Math.min(4, Math.max(1, gesture.current.scale * (pinchDistance / gesture.current.distance))))
+    if (pointers.current.size > 1) {
+      gesture.current.pinching = true
+      if (pinchDistance && gesture.current.distance) setZoom(Math.min(4, Math.max(1, gesture.current.scale * (pinchDistance / gesture.current.distance))))
       return
     }
     if (zoom > 1) {
@@ -257,11 +294,22 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
     }
   }
 
-  const onPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+  const onPointerEnd = (event: PointerEvent<HTMLDivElement>, cancelled = false) => {
     pointers.current.delete(event.pointerId)
     const start = gesture.current
+    if (!start) return
+
+    if (pointers.current.size > 0) {
+      const [remaining] = pointers.current.values()
+      if (remaining) gesture.current = { startX: remaining.x, startY: remaining.y, x: remaining.x, y: remaining.y, scale: zoom, distance: null, pinching: true }
+      return
+    }
+
     gesture.current = null
-    if (start && zoom === 1 && Math.abs(event.clientX - start.x) > 80 && pointers.current.size === 0) selectOffset(event.clientX > start.x ? -1 : 1)
+    const horizontalDistance = event.clientX - start.startX
+    const verticalDistance = event.clientY - start.startY
+    const isHorizontalSwipe = Math.abs(horizontalDistance) > 80 && Math.abs(horizontalDistance) > Math.abs(verticalDistance) * 1.3
+    if (!cancelled && !start.pinching && zoom === 1 && isHorizontalSwipe) selectOffset(horizontalDistance > 0 ? -1 : 1)
   }
 
   const onStageClick = (event: MouseEvent<HTMLDivElement>) => {
@@ -277,11 +325,14 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
         <span>{String(currentIndex + 1).padStart(2, '0')} / {String(photos.length).padStart(2, '0')} <i>·</i> {Math.round(zoom * 100)}%</span>
         <button ref={closeButton} type="button" aria-label="关闭查看器" onClick={onClose}><X aria-hidden="true" /></button>
       </div>
-      <div className={`lightbox__stage ${zoom > 1 ? 'lightbox__stage--zoomed' : ''}`} ref={stage} onClick={onStageClick} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerEnd} onPointerCancel={onPointerEnd}>
-        <div className="lightbox__photo-enter" key={selected.id}>
+      <div className={`lightbox__stage ${zoom > 1 ? 'lightbox__stage--zoomed' : ''} lightbox__stage--${transitionDirection}`} ref={stage} onClick={onStageClick} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerEnd} onPointerCancel={(event) => onPointerEnd(event, true)}>
+        {outgoingPhoto && <div className={`lightbox__photo-leave lightbox__photo-leave--${transitionDirection}`} aria-hidden="true">
+          <img src={assetUrl(outgoingPhoto.source)} alt="" draggable={false} />
+        </div>}
+        <div className={`lightbox__photo-enter lightbox__photo-enter--${transitionDirection}`} key={displayedPhoto.id}>
           <img
             className="lightbox__photo"
-            src={assetUrl(selected.source)}
+            src={assetUrl(displayedPhoto.source)}
             alt=""
             draggable={false}
             onDoubleClick={toggleZoom}
@@ -290,12 +341,12 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
         </div>
       </div>
       {canNavigate && <>
-        <button className="lightbox__nav lightbox__nav--previous" type="button" aria-label="上一张照片" onClick={() => selectOffset(-1)}><ChevronLeft aria-hidden="true" /></button>
-        <button className="lightbox__nav lightbox__nav--next" type="button" aria-label="下一张照片" onClick={() => selectOffset(1)}><ChevronRight aria-hidden="true" /></button>
+        <button className="lightbox__nav lightbox__nav--previous" type="button" aria-label="上一张照片" disabled={isTransitioning} onClick={() => selectOffset(-1)}><ChevronLeft aria-hidden="true" /></button>
+        <button className="lightbox__nav lightbox__nav--next" type="button" aria-label="下一张照片" disabled={isTransitioning} onClick={() => selectOffset(1)}><ChevronRight aria-hidden="true" /></button>
       </>}
-      <p className="lightbox__confession" key={`${selected.id}-${confession}`}>{confession}</p>
+      <p className={`lightbox__confession lightbox__confession--${transitionDirection}`} key={`${displayedPhoto.id}-${confession}`}>{confession}</p>
       <div className="lightbox__details">
-        <div><p>{selected.album.toUpperCase()}</p><span>{selectedDate}{selected.location ? ` · ${selected.location}` : ''}</span></div>
+        <div>{displayedPhoto.album !== '未分类' && <p>{displayedPhoto.album.toUpperCase()}</p>}<span>{selectedDate}{displayedPhoto.location ? ` · ${displayedPhoto.location}` : ''}</span></div>
         <button type="button" aria-label={zoom > 1 ? '还原图片大小' : '放大图片'} onClick={toggleZoom}>{zoom > 1 ? <Minimize2 aria-hidden="true" /> : <Maximize2 aria-hidden="true" />}</button>
       </div>
     </div>

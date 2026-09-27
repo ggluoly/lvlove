@@ -138,20 +138,33 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .empty-state .text-button { margin-top: 19px; }
 
 .lightbox { position: fixed; z-index: 50; inset: 0; display: grid; grid-template-rows: auto 1fr auto; color: #fff8f1; background: rgb(111 47 66 / 97%); animation: lightbox-in 300ms ease both; }
-.lightbox__toolbar, .lightbox__details { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 21px clamp(20px, 4vw, 56px); }
+.lightbox__toolbar, .lightbox__details { position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 21px clamp(20px, 4vw, 56px); }
 .lightbox__toolbar span, .lightbox__details p, .lightbox__details > div > span { color: #d4aaa1; font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; }
 .lightbox__toolbar i { margin-inline: 5px; font-style: normal; opacity: .55; }
 .lightbox button { display: grid; width: 39px; height: 39px; place-items: center; padding: 0; color: inherit; background: rgb(255 205 186 / 8%); border: 1px solid rgb(255 205 186 / 16%); border-radius: 50%; transition: background 180ms ease, transform 180ms ease; }
+.lightbox button:disabled { cursor: default; opacity: .45; }
 .lightbox button:hover { background: rgb(255 205 186 / 18%); transform: scale(1.06); }
-.lightbox__stage { min-height: 0; display: grid; place-items: center; overflow: hidden; touch-action: none; cursor: zoom-in; }
+.lightbox__stage { position: relative; z-index: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; touch-action: none; cursor: zoom-in; }
+.lightbox__stage::after { position: absolute; z-index: 0; inset: 12%; content: ''; border-radius: 50%; background: radial-gradient(circle, rgb(255 197 168 / 20%), transparent 66%); opacity: 0; pointer-events: none; }
+.lightbox__stage--forward::after, .lightbox__stage--backward::after { animation: stage-glow 620ms ease-out both; }
 .lightbox__stage--zoomed { cursor: grab; }
 .lightbox__stage:active { cursor: grabbing; }
-.lightbox__photo-enter { display: grid; max-width: min(92vw, 1500px); max-height: calc(100svh - 190px); animation: photo-arrive 420ms cubic-bezier(.2,.7,.2,1) both; }
+.lightbox__photo-enter, .lightbox__photo-leave { display: grid; max-width: min(92vw, 1500px); max-height: calc(100svh - 190px); }
+.lightbox__photo-enter { position: relative; z-index: 2; }
+.lightbox__photo-leave { position: absolute; z-index: 1; }
+.lightbox__photo-enter--initial { animation: photo-arrive 420ms cubic-bezier(.2,.7,.2,1) both; }
+.lightbox__photo-enter--forward { animation: photo-enter-forward 520ms cubic-bezier(.16,.84,.25,1) both; }
+.lightbox__photo-enter--backward { animation: photo-enter-backward 520ms cubic-bezier(.16,.84,.25,1) both; }
+.lightbox__photo-leave--forward { animation: photo-leave-forward 520ms cubic-bezier(.16,.84,.25,1) both; }
+.lightbox__photo-leave--backward { animation: photo-leave-backward 520ms cubic-bezier(.16,.84,.25,1) both; }
 .lightbox__stage img { display: block; max-width: min(92vw, 1500px); max-height: calc(100svh - 190px); object-fit: contain; user-select: none; will-change: transform; transition: transform 150ms ease; }
-.lightbox__nav { position: absolute; top: 50%; transform: translateY(-50%); }
+.lightbox__nav { position: absolute; z-index: 7; top: 50%; transform: translateY(-50%); }
 .lightbox__nav--previous { left: clamp(10px, 2vw, 32px); }
 .lightbox__nav--next { right: clamp(10px, 2vw, 32px); }
-.lightbox__confession { position: absolute; top: 50%; right: clamp(72px, 7vw, 140px); max-height: min(58vh, 590px); margin: 0; color: rgb(255 235 224 / 88%); font-family: 'Playfair Display', 'Microsoft YaHei', serif; font-size: clamp(1rem, 1.55vw, 1.3rem); letter-spacing: .12em; line-height: 2.05; text-shadow: 0 2px 18px rgb(92 34 50 / 28%); writing-mode: vertical-lr; text-orientation: mixed; transform: translateY(-50%); animation: confession-in 620ms cubic-bezier(.2,.7,.2,1) both; pointer-events: none; }
+.lightbox__confession { position: absolute; z-index: 6; top: 50%; right: clamp(72px, 7vw, 140px); max-height: min(58vh, 590px); margin: 0; color: rgb(255 235 224 / 88%); font-family: 'Playfair Display', 'Microsoft YaHei', serif; font-size: clamp(1rem, 1.55vw, 1.3rem); letter-spacing: .12em; line-height: 2.05; text-shadow: 0 2px 18px rgb(92 34 50 / 28%); writing-mode: vertical-lr; text-orientation: mixed; transform: translateY(-50%); pointer-events: none; }
+.lightbox__confession--initial { animation: confession-in 620ms cubic-bezier(.2,.7,.2,1) both; }
+.lightbox__confession--forward { animation: confession-enter-forward 620ms cubic-bezier(.2,.7,.2,1) both; }
+.lightbox__confession--backward { animation: confession-enter-backward 620ms cubic-bezier(.2,.7,.2,1) both; }
 .lightbox__details { align-items: end; }
 .lightbox__details p { margin: 0 0 5px; }
 .lightbox__details > div > span { display: block; margin-top: 5px; }
@@ -177,7 +190,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @keyframes memory-float { 0%, 100% { transform: translateY(0) rotate(7deg); } 50% { transform: translateY(-13px) rotate(4deg); } }
 @keyframes memory-float-alt { 0%, 100% { transform: translateY(0) rotate(-9deg); } 50% { transform: translateY(11px) rotate(-5deg); } }
 @keyframes photo-arrive { from { opacity: 0; filter: blur(8px); } to { opacity: 1; filter: blur(0); } }
+@keyframes photo-enter-forward { from { opacity: 0; filter: blur(12px); transform: translate3d(70px, 8px, 0) scale(.955) rotate(1.5deg); } to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1) rotate(0); } }
+@keyframes photo-enter-backward { from { opacity: 0; filter: blur(12px); transform: translate3d(-70px, 8px, 0) scale(.955) rotate(-1.5deg); } to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1) rotate(0); } }
+@keyframes photo-leave-forward { from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1) rotate(0); } to { opacity: 0; filter: blur(9px); transform: translate3d(-56px, -5px, 0) scale(.97) rotate(-1deg); } }
+@keyframes photo-leave-backward { from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1) rotate(0); } to { opacity: 0; filter: blur(9px); transform: translate3d(56px, -5px, 0) scale(.97) rotate(1deg); } }
+@keyframes stage-glow { 0% { opacity: 0; transform: scale(.82); } 45% { opacity: 1; } 100% { opacity: 0; transform: scale(1.12); } }
 @keyframes confession-in { from { opacity: 0; transform: translate3d(12px, -50%, 0); } to { opacity: 1; transform: translate3d(0, -50%, 0); } }
+@keyframes confession-enter-forward { from { opacity: 0; transform: translate3d(18px, -50%, 0); } to { opacity: 1; transform: translate3d(0, -50%, 0); } }
+@keyframes confession-enter-backward { from { opacity: 0; transform: translate3d(-18px, -50%, 0); } to { opacity: 1; transform: translate3d(0, -50%, 0); } }
 
 @media (max-width: 760px) {
   .container { width: min(100% - 32px, 1360px); }
