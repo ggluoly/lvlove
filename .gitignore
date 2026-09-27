@@ -1,0 +1,25 @@
+# Dependencies and local tool state
+node_modules/
+.vite/
+
+# Build output and generated photo derivatives
+dist/
+public/photo-assets/
+public/photos.json
+reports/
+
+# One-time raw import source. The normalized originals live in public/photos/.
+20260927/
+
+# Test, coverage, and local diagnostics
+coverage/
+.playwright-mcp/
+playwright-report/
+test-results/
+*.log
+npm-debug.log*
+
+# TypeScript and OS artifacts
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
