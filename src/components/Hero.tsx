@@ -15,6 +15,7 @@ export function Hero({ photos }: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const reducedMotion = useReducedMotion()
   const latest = photos[0]
+  const previous = photos[1]
   const years = new Set(photos.map((photo) => photo.year))
   const albums = new Set(photos.map((photo) => photo.album))
   const yearRange = years.size ? `${Math.min(...years)} - ${Math.max(...years)}` : '等待第一张照片'
@@ -38,10 +39,16 @@ export function Hero({ photos }: HeroProps) {
       <div className="hero__glow hero__glow--one" aria-hidden="true" />
       <div className="hero__glow hero__glow--two" aria-hidden="true" />
       <div className="hero__grain" />
-      {latest && <aside className="hero__memory-card" aria-hidden="true">
-        <div className="hero__memory-image" style={{ backgroundImage: `url(${backgroundImage})` }} />
-        <span>A SMALL DAY / {latest.date}</span>
-      </aside>}
+      {latest && <div className="hero__memory-cards" aria-hidden="true">
+        <aside className="hero__memory-card hero__memory-card--latest">
+          <div className="hero__memory-image" style={{ backgroundImage: `url(${backgroundImage})` }} />
+          <span>A SMALL DAY / {latest.date}</span>
+        </aside>
+        {previous && <aside className="hero__memory-card hero__memory-card--previous">
+          <div className="hero__memory-image" style={{ backgroundImage: `url(${assetUrl(previous.sources.webp.at(-1) ?? previous.source)})` }} />
+          <span>KEPT CLOSE / {previous.date}</span>
+        </aside>}
+      </div>}
       <div className="hero__content container">
         <p className="eyebrow hero__eyebrow">{siteConfig.eyebrow}</p>
         <h1>{siteConfig.title}</h1>
@@ -52,7 +59,7 @@ export function Hero({ photos }: HeroProps) {
             <span><strong>{photos.length}</strong> 张照片</span>
             <span><strong>{albums.size}</strong> 个分类</span>
           </div>
-          <Link className="round-link" to="/gallery">浏览照片 <ArrowDownRight aria-hidden="true" /></Link>
+          <Link className="round-link" to="/gallery">岁月留香 <ArrowDownRight aria-hidden="true" /></Link>
         </div>
       </div>
       {latest && <p className="hero__caption">A LITTLE MOMENT / {latest.date}</p>}

@@ -23,6 +23,7 @@ export function PhotoCard({ photo, onOpen, priority = false, position = 0 }: Pho
   const avifSources = photo.sources.avif.map(assetUrl)
   const webpSources = photo.sources.webp.map(assetUrl)
   const sourceSet = (sources: string[]) => sources.map((source, sourceIndex) => `${source} ${[480, 960, 1440][sourceIndex]}w`).join(', ')
+  const photoDate = fullDateFormatter.format(new Date(`${photo.date}T00:00:00`))
   const updateTilt = (event: PointerEvent<HTMLButtonElement>) => {
     if (reducedMotion || event.pointerType !== 'mouse') return
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -48,21 +49,20 @@ export function PhotoCard({ photo, onOpen, priority = false, position = 0 }: Pho
       onClick={() => onOpen(photo)}
       onPointerMove={updateTilt}
       onPointerLeave={resetTilt}
-      aria-label={`查看照片：${photo.title}`}
+      aria-label={`查看 ${photoDate} 的照片`}
       style={{ backgroundImage: `url(${preview})`, '--card-delay': `${Math.min(position, 9) * 45}ms` } as CSSProperties}
     >
       {shouldLoad && (
         <picture>
           <source type="image/avif" srcSet={sourceSet(avifSources)} sizes="(max-width: 720px) 92vw, (max-width: 1100px) 45vw, 28vw" />
           <source type="image/webp" srcSet={sourceSet(webpSources)} sizes="(max-width: 720px) 92vw, (max-width: 1100px) 45vw, 28vw" />
-          <img src={webpSources[1] ?? assetUrl(photo.source)} alt={photo.title} width={photo.width} height={photo.height} loading={priority ? 'eager' : 'lazy'} decoding="async" onLoad={() => setLoaded(true)} />
+          <img src={webpSources[1] ?? assetUrl(photo.source)} alt="" width={photo.width} height={photo.height} loading={priority ? 'eager' : 'lazy'} decoding="async" onLoad={() => setLoaded(true)} />
         </picture>
       )}
       <span className="photo-card__veil" />
       <span className="photo-card__meta">
         <span>
-          <strong>{photo.title}</strong>
-          <small>{fullDateFormatter.format(new Date(`${photo.date}T00:00:00`))}{photo.location ? ` · ${photo.location}` : ''}</small>
+          <small>{photoDate}{photo.location ? ` · ${photo.location}` : ''}</small>
         </span>
         <span className="photo-card__action"><Expand size={17} aria-hidden="true" /></span>
       </span>

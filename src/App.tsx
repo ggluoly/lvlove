@@ -59,7 +59,7 @@ function HomePage({ photos }: { photos: Photo[] }) {
     <main className="container home-content">
       <Reveal className="section-intro">
         <div><p className="eyebrow">THE DAYS WE KEPT</p><h2>靠近的片段</h2></div>
-        <Link className="text-link" to="/gallery">全部照片 <ArrowRight size={16} aria-hidden="true" /></Link>
+        <Link className="text-link" to="/gallery">人间小满 <ArrowRight size={16} aria-hidden="true" /></Link>
       </Reveal>
       {featured.length ? <MasonryGrid photos={featured} onOpen={setSelected} /> : <EmptyState />}
     </main>
@@ -90,7 +90,7 @@ function ArchivePage({ photos, mode }: { photos: Photo[]; mode: 'gallery' | 'tim
   return <main className="archive-page container">
     <Reveal className="archive-header">
       <p className="eyebrow">{mode === 'gallery' ? 'THE DAYS WE KEPT' : 'A WALK THROUGH TIME'}</p>
-      <h1>{mode === 'gallery' ? '日常的片段' : '沿途的光'}</h1>
+      <h1>{mode === 'gallery' ? '人间小满' : '沿途的光'}</h1>
       <p>{mode === 'gallery' ? '那些不必解释的瞬间，都被好好留在这里。' : '顺着走过的日子，把每一次回头都变成坐标。'}</p>
       <div className="archive-header__stat"><strong>{filtered.length}</strong> FRAMES <span /> <strong>{groupCount}</strong> YEARS</div>
     </Reveal>

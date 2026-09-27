@@ -147,6 +147,7 @@ function takeNextConfession() {
 
 export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps) {
   const currentIndex = photos.findIndex((photo) => photo.id === selected.id)
+  const selectedDate = fullDateFormatter.format(new Date(`${selected.date}T00:00:00`))
   const [zoom, setZoom] = useState(1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [confession, setConfession] = useState(takeNextConfession)
@@ -271,7 +272,7 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
   const canNavigate = photos.length > 1
 
   return (
-    <div className="lightbox" ref={dialog} role="dialog" aria-modal="true" aria-label={`查看照片 ${selected.title}`}>
+    <div className="lightbox" ref={dialog} role="dialog" aria-modal="true" aria-label={`查看 ${selectedDate} 的照片`}>
       <div className="lightbox__toolbar">
         <span>{String(currentIndex + 1).padStart(2, '0')} / {String(photos.length).padStart(2, '0')} <i>·</i> {Math.round(zoom * 100)}%</span>
         <button ref={closeButton} type="button" aria-label="关闭查看器" onClick={onClose}><X aria-hidden="true" /></button>
@@ -281,7 +282,7 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
           <img
             className="lightbox__photo"
             src={assetUrl(selected.source)}
-            alt={selected.title}
+            alt=""
             draggable={false}
             onDoubleClick={toggleZoom}
             style={{ transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})` }}
@@ -294,7 +295,7 @@ export function Lightbox({ photos, selected, onClose, onSelect }: LightboxProps)
       </>}
       <p className="lightbox__confession" key={`${selected.id}-${confession}`}>{confession}</p>
       <div className="lightbox__details">
-        <div><p>{selected.album.toUpperCase()}</p><h2>{selected.title}</h2><span>{fullDateFormatter.format(new Date(`${selected.date}T00:00:00`))}{selected.location ? ` · ${selected.location}` : ''}</span></div>
+        <div><p>{selected.album.toUpperCase()}</p><span>{selectedDate}{selected.location ? ` · ${selected.location}` : ''}</span></div>
         <button type="button" aria-label={zoom > 1 ? '还原图片大小' : '放大图片'} onClick={toggleZoom}>{zoom > 1 ? <Minimize2 aria-hidden="true" /> : <Maximize2 aria-hidden="true" />}</button>
       </div>
     </div>

@@ -21,9 +21,9 @@ export function Timeline({ photos, onOpen }: TimelineProps) {
                 <div className="timeline-month__heading"><span>{formatMonth(month)}</span><small>{monthPhotos.length} frames</small></div>
                 <div className="timeline-frames">
                   {monthPhotos.map((photo) => (
-                    <button type="button" className="timeline-frame" key={photo.id} onClick={() => onOpen(photo)}>
+                    <button type="button" className="timeline-frame" key={photo.id} onClick={() => onOpen(photo)} aria-label={`查看 ${fullDateFormatter.format(new Date(`${photo.date}T00:00:00`))} 的照片`}>
                       <img src={assetUrl(photo.sources.webp[0] ?? photo.source)} alt="" loading="lazy" />
-                      <span><strong>{photo.title}</strong><small>{fullDateFormatter.format(new Date(`${photo.date}T00:00:00`))}</small></span>
+                      <span><small>{fullDateFormatter.format(new Date(`${photo.date}T00:00:00`))}</small></span>
                     </button>
                   ))}
                 </div>
