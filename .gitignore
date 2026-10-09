@@ -6,6 +6,7 @@ node_modules/
 dist/
 public/photo-assets/
 public/photos.json
+public/letters.json
 reports/
 
 # One-time raw import source. The normalized originals live in public/photos/.

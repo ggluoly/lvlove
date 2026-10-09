@@ -4,25 +4,29 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "predev": "npm run generate:letters",
     "dev": "vite",
-    "build": "npm run generate:photos && tsc -b && vite build",
+    "build": "npm run generate:photos && npm run generate:letters && tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",
     "generate:photos": "node scripts/generate-photos.mjs",
+    "generate:letters": "node scripts/generate-letters.mjs",
     "import:photos": "node scripts/import-existing-photos.mjs"
   },
   "dependencies": {
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "react-router-dom": "latest"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "latest",
+    "remark-breaks": "^4.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "latest",
     "exifr": "latest",
     "sharp": "latest",
     "typescript": "latest",

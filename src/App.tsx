@@ -4,6 +4,8 @@ import { HashRouter, Link, Route, Routes } from 'react-router-dom'
 import { ArchiveControls } from './components/ArchiveControls'
 import { EmptyState } from './components/EmptyState'
 import { Hero } from './components/Hero'
+import { LetterCard } from './components/LetterCard'
+import { LetterViewer } from './components/LetterViewer'
 import { Lightbox } from './components/Lightbox'
 import { MasonryGrid } from './components/MasonryGrid'
 import { Navbar } from './components/Navbar'
@@ -11,6 +13,7 @@ import { Reveal } from './components/Reveal'
 import { ScrollProgress } from './components/ScrollProgress'
 import { Timeline } from './components/Timeline'
 import { siteConfig } from './data/site-config'
+import type { Letter, LetterManifest } from './types/letter'
 import type { Photo, PhotoManifest, SortOrder } from './types/photo'
 import { groupPhotosByYearAndMonth, searchablePhotoText, sortPhotos } from './utils/photos'
 import { assetUrl } from './utils/url'
@@ -43,6 +46,7 @@ function App() {
         <Route path="/" element={<HomePage photos={photos} />} />
         <Route path="/gallery" element={<ArchivePage photos={photos} mode="gallery" />} />
         <Route path="/timeline" element={<ArchivePage photos={photos} mode="timeline" />} />
+        <Route path="/letters" element={<LettersPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<HomePage photos={photos} />} />
       </Routes>}
@@ -110,6 +114,48 @@ function GallerySections({ photos, onOpen }: { photos: Photo[]; onOpen: (photo: 
       </div>)}
     </Reveal>)}
   </div>
+}
+
+function LettersPage() {
+  const [letters, setLetters] = useState<Letter[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState<Letter | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch(assetUrl('letters.json'), { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`信件清单读取失败 (${response.status})`)
+        return response.json() as Promise<LetterManifest>
+      })
+      .then((manifest) => { if (!controller.signal.aborted) setLetters(manifest.letters) })
+      .catch((error: unknown) => {
+        if ((error as Error).name !== 'AbortError') setLoadError((error as Error).message)
+      })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false) })
+    return () => controller.abort()
+  }, [])
+
+  return <main className="letters-page container">
+    <Reveal className="archive-header">
+      <p className="eyebrow">WORDS KEPT FOR YOU</p>
+      <h1>纸短情长</h1>
+      <p>有些话不急着说出口，就先放在这里，等一个安静的时刻被你拆开。</p>
+    </Reveal>
+    {loading ? <p role="status" className="letters-page__error">正在整理写给你的话…</p> : loadError ? (
+      <p className="letters-page__error">{loadError}，请先运行 <code>npm run generate:letters</code>。</p>
+    ) : letters.length ? (
+      <div className="letters-list">
+        {letters.map((letter, index) => (
+          <LetterCard key={letter.id} letter={letter} index={index} onOpen={setSelected} />
+        ))}
+      </div>
+    ) : (
+      <section className="letters-page__empty"><h2>有些话，正在落笔</h2><p>下一封信，会在这里等你。</p></section>
+    )}
+    {selected && <LetterViewer key={selected.id} letter={selected} onClose={() => setSelected(null)} />}
+  </main>
 }
 
 function AboutPage() {

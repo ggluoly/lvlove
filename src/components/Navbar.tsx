@@ -8,6 +8,7 @@ const links = [
   { to: '/', label: '首页' },
   { to: '/gallery', label: '相册' },
   { to: '/timeline', label: '时间轴' },
+  { to: '/letters', label: '信' },
   { to: '/about', label: '关于' },
 ]
 
